@@ -21,6 +21,7 @@
 
 #include <linux/mmc/card.h>
 #include <linux/mmc/host.h>
+#include <linux/sched/rt.h>
 #include "queue.h"
 //ASUS_BSP Deeo : mmc suspend stress test +++
 #ifdef CONFIG_MMC_SUSPENDTEST
@@ -144,6 +145,11 @@ static inline void mmc_cmdq_ready_wait(struct mmc_host *host,
 {
 	struct mmc_cmdq_context_info *ctx = &host->cmdq_ctx;
 	struct request_queue *q = mq->queue;
+	struct sched_param scheduler_params = {0};
+
+	scheduler_params.sched_priority = 1;
+
+	sched_setscheduler(current, SCHED_FIFO, &scheduler_params);
 
 	/*
 	 * Wait until all of the following conditions are true:
